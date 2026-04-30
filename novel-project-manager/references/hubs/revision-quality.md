@@ -1,9 +1,9 @@
-# Hub: Revision & Quality
+# 索引：返修与质检
 
 适用任务：
 
 - 单章扩写、重写、润色
-- 去 AI 味、修对白、修节奏、修结尾
+- 去生成腔、修对白、修节奏、修结尾
 - 章节质检、风格复查、一致性检查
 
 先读顺序：
@@ -14,7 +14,7 @@
 
 按需下钻：
 
-- 去 AI 味返修：`references/quality/anti-ai-rewrite.md`
+- 去生成腔返修：`references/quality/anti-ai-rewrite.md`
 - 规则化文本检查：`references/quality/rule-linting.md`
 - 审阅报告约定：`references/quality/review-reporting.md`
 - 风格与风险护栏：`references/quality/style-guardrails.md`

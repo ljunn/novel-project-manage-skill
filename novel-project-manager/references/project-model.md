@@ -1,10 +1,10 @@
-# Project Model
+# 项目模型
 
-This reference defines the managed novel project shape. Use it when creating a project, filling a PRD, generating tasks, or explaining where artifacts should live.
+本文定义受管理的小说项目形态。创建项目、填写需求文档、生成任务，或说明产物应放在哪里时使用。
 
-## Directory Structure
+## 目录结构
 
-Default structure:
+默认结构：
 
 ```text
 [project]/
@@ -32,15 +32,15 @@ Default structure:
 └── research/
 ```
 
-Compatibility:
+兼容规则：
 
-- `manuscript/` is the default chapter prose folder.
-- If imported material uses the source design's `chapters/`, treat it as a legacy alias for reading/status. New chapter output should still go to `manuscript/`.
-- `.novel-project/` is operational state; do not place prose there.
+- `manuscript/` 是默认章节正文目录。
+- 如果导入材料使用源方案里的 `chapters/`，只把它当成读取和状态检查的旧别名。新章节仍输出到 `manuscript/`。
+- `.novel-project/` 是运行状态目录，不放正文。
 
-## PRD Template
+## 需求文档模板
 
-Create `.novel-project/.taskmaster/docs/prd.txt` with these sections:
+创建 `.novel-project/.taskmaster/docs/prd.txt` 时使用以下结构：
 
 ```text
 # 《小说标题》项目需求文档
@@ -93,9 +93,9 @@ Create `.novel-project/.taskmaster/docs/prd.txt` with these sections:
 - 平台适配：
 ```
 
-## Task Schema
+## 任务字段
 
-`tasks.json` should be boring and explicit. Use this schema:
+`tasks.json` 要朴素、明确，使用以下字段结构：
 
 ```json
 {
@@ -117,28 +117,28 @@ Create `.novel-project/.taskmaster/docs/prd.txt` with these sections:
 }
 ```
 
-Statuses: `todo`, `doing`, `blocked`, `done`.
+状态取值：`todo`、`doing`、`blocked`、`done`。
 
-Priorities: `high`, `medium`, `low`.
+优先级取值：`high`、`medium`、`low`。
 
-## Default Task Breakdown
+## 默认任务拆解
 
-Generate tasks in four phases:
+按四个阶段生成任务：
 
-- **设定完善**: worldbuilding, power/rule system, character files, relationship map.
-- **大纲构建**: main plot, key turns, volume outlines, chapter list, emotion curve.
-- **章节写作**: golden opening, first ten chapters, first climax, stable update batches.
-- **质量管控**: volume self-check, consistency pass, pacing pass, reader feedback analysis.
+- **设定完善**：世界观、力量/规则体系、人物档案、关系图。
+- **大纲构建**：主线、关键转折、分卷大纲、章节列表、情绪曲线。
+- **章节写作**：黄金开篇、前十章、第一个高潮、稳定更新批次。
+- **质量管控**：分卷自检、连贯性检查、节奏检查、读者反馈分析。
 
-Critical path:
+关键路径：
 
 ```text
 世界观设定 -> 人物设定 -> 主线设计 -> 分卷规划 -> 黄金三章 -> 第一个高潮 -> 中期转折 -> 结局
 ```
 
-## Progress Dashboard
+## 进度看板
 
-Use this compact report shape:
+使用这个紧凑汇报格式：
 
 ```text
 ## 项目进度
@@ -155,19 +155,19 @@ Use this compact report shape:
 - [低优先级] 次要副本设计
 ```
 
-Do not invent metrics. If a value is not measured, label it `未评估`.
+不要编造指标。未测量的值标为 `未评估`。
 
-## Artifact Templates
+## 产物模板
 
-Manuscript chapter:
+章节正文：
 
 ```markdown
 [从第一句故事正文直接开始，不加标题、不加备注、不加作者说]
 ```
 
-Use filenames such as `第0001章_标题.md` or `0001_标题.md`; chapter titles, summaries, foreshadowing notes, and publishing notes belong in `task_log.md`, `docs/章节规划.md`, `plot/伏笔记录.md`, or a separate publishing package, not in the manuscript file.
+文件名使用 `第0001章_标题.md` 或 `0001_标题.md` 这类格式；章节标题、摘要、伏笔备注和发布备注应写入 `task_log.md`、`docs/章节规划.md`、`plot/伏笔记录.md` 或单独发布包，不写进正文文件。
 
-Character card:
+人物卡：
 
 ```markdown
 # 姓名

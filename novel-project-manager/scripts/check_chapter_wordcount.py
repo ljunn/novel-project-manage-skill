@@ -23,7 +23,7 @@ if sys.platform == 'win32':
 
 def count_story_units(text: str) -> int:
     """统计正文体量，中文按字计，英文/数字按词计。"""
-    # 移除Markdown标记
+    # 移除标记文本符号
     text = re.sub(r'#{1,6}\s*', '', text)  # 标题
     text = re.sub(r'\*\*(.*?)\*\*', r'\1', text)  # 粗体
     text = re.sub(r'\*(.*?)\*', r'\1', text)  # 斜体

@@ -5,7 +5,7 @@ severity: warning
 scope: full
 type: keywords
 threshold: 2
-message: "检测到可能的视角越权表达，检查是否直接宣布了非当前 POV 的判断或群体认知。"
+message: "检测到可能的视角越权表达，检查是否直接宣布了非当前视角的判断或群体认知。"
 keywords:
   - 所有人都知道
   - 所有人都明白

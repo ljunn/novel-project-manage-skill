@@ -13,7 +13,7 @@
 
 当前优先覆盖 3 类问题：
 
-- AI 套语
+- 生成腔套语
 - 结尾升华 / 结尾总结
 - 视角越权提示
 - 对白说明感
@@ -31,7 +31,7 @@
 
 - `rules/novel-lint/*.yaml`
 
-`review` 默认还会把审稿稿本写进 `<项目目录>/审阅意见/`。相关落盘规则见 `references/quality/review-reporting.md`；命中 AI 套语、解释腔、抽象心理时，返修可联动 `references/quality/anti-ai-rewrite.md`。
+`review` 默认还会把审稿稿本写进 `<项目目录>/审阅意见/`。相关落盘规则见 `references/quality/review-reporting.md`；命中生成腔套语、解释腔、抽象心理时，返修可联动 `references/quality/anti-ai-rewrite.md`。
 
 ## 规则字段
 
@@ -71,7 +71,7 @@
 
 ## 当前最适合规则化的问题
 
-- AI 微表情套语
+- 生成腔微表情套语
 - 感悟式结尾
 - 感叹式结尾
 - 视角越权提示

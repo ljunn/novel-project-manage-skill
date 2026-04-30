@@ -124,14 +124,14 @@ THRILL_PATTERNS = {
 
 
 POISON_PATTERNS = {
-    'AI常用词': {
+    '生成腔常用词': {
         'keywords': [
             '众所周知', '不言而喻', '须弥芥子', '璀璨', '瑰丽',
             '绚烂', '夺目', '耀眼', '绝美', '俊美无俦',
             '令人窒息', '无法言喻', '言语无法形容'
         ],
         'weight': 2,
-        'description': 'AI常用的华丽但空洞的词汇',
+        'description': '生成腔常用的华丽但空洞的词汇',
         'scope': 'full'
     },
     '高风险感官套语': {
@@ -140,7 +140,7 @@ POISON_PATTERNS = {
             '周遭的空气仿佛凝固了', '令人疯狂的窒息感', '呼吸如破风箱'
         ],
         'weight': 2,
-        'description': '高频 AI 感官套语，若反复出现建议改写为更具体的场面',
+        'description': '高频生成腔感官套语，若反复出现建议改写为更具体的场面',
         'scope': 'full'
     },
     '高风险微表情套语': {
@@ -150,7 +150,7 @@ POISON_PATTERNS = {
             '呢喃', '叹息声空气中回荡'
         ],
         'weight': 2,
-        'description': '常见 AI 微表情或人物描写套语，重复时容易失真',
+        'description': '常见 生成腔微表情或人物描写套语，重复时容易失真',
         'scope': 'full'
     },
     '高风险抽象形容': {
@@ -362,7 +362,7 @@ def print_thrill_poison_analysis(result: dict):
     if result['thrill_score'] < 10:
         print('   • 建议增加爽点：打脸反转、境界突破、宝物获得')
     if result['poison_score'] > 5:
-        print('   • 建议减少毒点：避免AI常用词、感悟式结尾和过度解释')
+        print('   • 建议减少毒点：避免生成腔常用词、感悟式结尾和过度解释')
     poison_names = {item['pattern'] for item in result['poisons']}
     if poison_names & {'高风险感官套语', '高风险微表情套语', '高风险抽象形容'}:
         print('   • 高风险套语偏多时，不要只删词，优先改写成具体动作、环境、物件或后果')

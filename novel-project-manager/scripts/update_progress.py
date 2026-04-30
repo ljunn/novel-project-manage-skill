@@ -22,6 +22,62 @@ PROJECT_OUTLINE_PATH = "docs/项目总纲.md"
 CHAPTER_PLAN_PATH = "docs/章节规划.md"
 
 
+def localize_argparse_help(text: str) -> str:
+    return (
+        text.replace("usage:", "用法:")
+        .replace("positional arguments:", "位置参数:")
+        .replace("optional arguments:", "选项:")
+        .replace("options:", "选项:")
+        .replace("show this help message and exit", "显示此帮助信息并退出")
+    )
+
+
+CHINESE_METAVARS = {
+    "project_path": "项目目录",
+    "chapter_num": "章节号",
+    "word_count": "字数",
+    "chapter_title": "章节标题",
+    "summary": "摘要",
+    "core_event": "核心事件",
+    "hook": "悬念钩子",
+    "next_goal": "下一章目标",
+    "viewpoint": "视角人物",
+    "protagonist_location": "主角位置",
+    "protagonist_state": "主角状态",
+    "stage": "创作阶段",
+    "target_total_words": "目标字数",
+    "target_volumes": "目标卷数",
+    "current_volume": "当前卷",
+    "current_phase": "当前阶段",
+    "phase_goal": "阶段目标",
+    "pending_setting_sync": "设定变更",
+    "plot_note": "伏笔备注",
+    "status": "状态",
+}
+
+
+class ChineseArgumentParser(argparse.ArgumentParser):
+    """让命令行帮助文本保持中文。"""
+
+    def add_argument(self, *args: str, **kwargs: object) -> argparse.Action:
+        if "metavar" not in kwargs and kwargs.get("action") not in {"store_true", "store_false", "help", "version"}:
+            dest = kwargs.get("dest")
+            option_strings = [arg for arg in args if isinstance(arg, str) and arg.startswith("-")]
+            if dest is None and option_strings:
+                dest = option_strings[-1].lstrip("-").replace("-", "_")
+            elif dest is None and args and isinstance(args[0], str):
+                dest = args[0]
+            if isinstance(dest, str) and dest in CHINESE_METAVARS:
+                kwargs["metavar"] = CHINESE_METAVARS[dest]
+        return super().add_argument(*args, **kwargs)
+
+    def format_usage(self) -> str:
+        return localize_argparse_help(super().format_usage())
+
+    def format_help(self) -> str:
+        return localize_argparse_help(super().format_help())
+
+
 def resolve_project_outline_path(project_dir: Path) -> Path | None:
     primary = project_dir / PROJECT_OUTLINE_PATH
     legacy = project_dir / LEGACY_OUTLINE_PATH
@@ -511,7 +567,7 @@ def update_governance_state(
 
 
 def parse_args() -> argparse.Namespace:
-    parser = argparse.ArgumentParser(description="更新小说项目进度")
+    parser = ChineseArgumentParser(description="更新小说项目进度")
     parser.add_argument("project_path", help="项目根目录")
     parser.add_argument("chapter_num", type=int, help="最新完成章节号")
     parser.add_argument("--word-count", type=int, help="当前章节字数，可选")

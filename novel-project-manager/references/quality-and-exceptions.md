@@ -1,170 +1,170 @@
-# Quality And Exceptions
+# 质量与异常
 
-Use this reference for scoring project complexity, choosing tool-like checks, and handling common web-novel production failures.
+评估项目复杂度、选择检查项、处理常见网文生产故障时使用本参考。
 
-## Complexity Score
+## 复杂度评分
 
-Score each dimension from 1 to 5:
+每个维度按 1 到 5 分打分：
 
-- Worldbuilding complexity
-- Number/depth of characters
-- Number of plot lines
-- Professional research need
-- Update intensity
+- 世界观复杂度
+- 人物数量与深度
+- 情节线数量
+- 专业资料需求
+- 更新强度
 
-Interpretation:
+解释：
 
-- 5-10: light management; PRD + task list is enough.
-- 11-17: normal serial management; use chapter gates and consistency records.
-- 18-25: high-risk long-form project; require volume/phase governance and regular audits.
+- 5-10 分：轻量管理，需求文档加任务列表即可。
+- 11-17 分：常规连载管理，需要章节门禁和一致性记录。
+- 18-25 分：高风险长篇项目，需要分卷/阶段治理和定期审计。
 
-## Tool Map
+## 检查项地图
 
-Core checks:
+核心检查：
 
-- chapter outline generation
-- dialogue optimization
-- plot conflict detection
-- pacing analysis
-- sensitive-content review
-- chapter attraction scoring
-- reader feedback analysis
+- 章节大纲生成
+- 对白优化
+- 剧情冲突检测
+- 节奏分析
+- 敏感内容审阅
+- 章节吸引力评分
+- 读者反馈分析
 
-Standard checks:
+标准检查：
 
-- power-system balance
-- worldbuilding consistency
-- foreshadowing management
-- emotion curve
-- chapter hook
-- update cadence
-- word count and progress
-- comparable-market research
-- popular-element analysis
-- golden-finger design
-- progression-system planning
-- dungeon/case/arc generation
-- romance-line development
-- antagonist shaping
-- payoff-density analysis
+- 力量体系平衡
+- 世界观一致性
+- 伏笔管理
+- 情绪曲线
+- 章节钩子
+- 更新节奏
+- 字数与进度
+- 同类市场研究
+- 流行元素分析
+- 金手指设计
+- 升级体系规划
+- 副本/案件/篇章生成
+- 感情线发展
+- 反派塑造
+- 回报密度分析
 
-Extended checks:
+扩展检查：
 
-- poem/name generation for xianxia
-- map assistance
-- timeline management
-- multi-line coordination
-- system-interface design
-- infinite-flow instance design
-- cosmic-horror integration
-- science-fiction plausibility
-- historical verification
-- food description enhancement
-- battle scene optimization
-- daily-life plot design
+- 仙侠诗词/命名生成
+- 地图辅助
+- 时间线管理
+- 多线协调
+- 系统界面设计
+- 无限流副本设计
+- 克苏鲁/宇宙恐怖融合
+- 科幻合理性检查
+- 历史资料核验
+- 美食描写增强
+- 战斗场面优化
+- 日常剧情设计
 
-Do not pretend all checks are automated. Treat this map as a dispatch list: decide whether a script, research pass, or human-readable review is needed.
+不要假装所有检查都已经自动化。把这张表当成调度清单：判断当前需要脚本、资料检索，还是人工可读审阅。
 
-## Model/Agent Division
+## 模型/代理分工
 
-Use this as a role split, not a hard dependency:
+把它当成角色分工，不当成硬依赖：
 
-- Main reasoning/writing model: core plot, character depth, complex worldbuilding, key chapters.
-- Research model/tool: historical/cultural background, domain facts, trend and audience preference research.
-- Fast fallback model/tool: daily-life filler, dialogue polish, scene detail, transition paragraphs.
+- 主推理/写作模型：核心剧情、人物深度、复杂世界观、关键章节。
+- 资料模型/工具：历史文化背景、领域事实、趋势和读者偏好研究。
+- 快速兜底模型/工具：日常填充、对白润色、场景细节、过渡段。
 
-When only one model is available, simulate the split by doing the passes separately.
+只有一个模型可用时，用分轮处理模拟这种分工。
 
-## Quality Gates
+## 质量门禁
 
-First 3 chapters:
+前 3 章：
 
-- genre/promise is visible within the opening;
-- protagonist has a concrete problem;
-- the selling point is shown, not only explained;
-- first hook points to the next chapter;
-- no long lore dump before conflict.
+- 开篇能看出题材和承诺；
+- 主角有具体问题；
+- 卖点被演出来，而不是只解释出来；
+- 第一个钩子指向下一章；
+- 冲突出现前没有长篇设定倾倒。
 
-Every chapter:
+每章：
 
-- one dominant event;
-- state A -> state B movement;
-- at least one payoff, reveal, relationship move, upgrade, or tactical win;
-- active pressure at the end;
-- no contradiction with PRD/world/character records.
+- 一个主导事件；
+- 从状态 A 推进到状态 B；
+- 至少一次回报、揭示、关系推进、升级或战术胜利；
+- 结尾保留活跃压力；
+- 不与需求文档、世界观、人物记录矛盾。
 
-Every 5-10 chapters:
+每 5-10 章：
 
-- repeated payoff pattern is not stale;
-- protagonist agency remains visible;
-- supporting cast is not only functional;
-- foreshadowing has active status;
-- timeline and power progression still make sense.
+- 重复回报模式没有失去新鲜感；
+- 主角能动性仍然可见；
+- 配角不是纯功能件；
+- 伏笔有活跃状态；
+- 时间线和力量进阶仍然合理。
 
-Volume ending:
+卷末：
 
-- volume conflict is resolved or transformed;
-- next volume's problem is seeded;
-- major foreshadowing is either paid or deliberately carried;
-- reader receives enough compensation for setbacks.
+- 本卷冲突被解决或转化；
+- 下一卷问题已经埋下；
+- 重大伏笔已经兑现，或明确延后携带；
+- 读者因挫折获得足够补偿。
 
-## Failure Modes
+## 失败模式
 
-### Stuck For More Than Two Days
+### 卡文超过两天
 
-Trigger: same task stays `doing` or `blocked` beyond its expected duration.
+触发：同一任务停留在 `doing` 或 `blocked`，超过预期时长。
 
-Action:
+处理：
 
-1. Identify missing engine: goal, conflict, cost, opponent, secret, transition, or payoff.
-2. Provide three rescue directions:
-   - intensify existing conflict;
-   - reveal hidden information;
-   - force a new decision under time pressure.
-3. Convert chosen direction to a task.
+1. 判断缺失的推进引擎：目标、冲突、代价、对手、秘密、过渡或回报。
+2. 给出三个救援方向：
+   - 强化现有冲突；
+   - 揭露隐藏信息；
+   - 在时间压力下迫使人物做新决定。
+3. 把选定方向转成任务。
 
-### Setting Conflict
+### 设定冲突
 
-Trigger: new draft violates worldbuilding, power rules, timeline, character motivation, or previous chapter facts.
+触发：新草稿违反世界观、力量规则、时间线、人物动机或前文事实。
 
-Action:
+处理：
 
-1. Prefer higher-level memory: constitution/world rules > PRD/outline > plot/timeline > task state > draft.
-2. Patch the lower-priority source.
-3. If the change affects ending, long arc, power ceiling, or relationship boundary, update `docs/变更日志.md`.
+1. 优先采用更高层记忆：全书宪法/世界规则 > 需求文档/大纲 > 情节/时间线 > 任务状态 > 草稿。
+2. 修补低优先级来源。
+3. 如果变更影响结局、长线、力量上限或关系边界，更新 `docs/变更日志.md`。
 
-### Pacing Imbalance
+### 节奏失衡
 
-Trigger: three consecutive chapters have no concrete payoff or only setup.
+触发：连续三章没有具体回报，或只有铺垫。
 
-Action:
+处理：
 
-1. Add a small climax, tactical win, reveal, relationship move, or upgrade.
-2. Compress exposition.
-3. Make the next task a payoff task before more setup.
+1. 增加一个小高潮、战术胜利、揭示、关系推进或升级。
+2. 压缩说明。
+3. 在继续铺垫前，把下一项任务改成回报任务。
 
-### Negative Reader Feedback
+### 负面读者反馈
 
-Trigger: negative feedback ratio exceeds 30%, or repeated comments point at the same mismatch.
+触发：负面反馈比例超过 30%，或重复评论指向同一个错位。
 
-Action:
+处理：
 
-1. Classify as expectation mismatch, character dislike, pacing fatigue, payoff failure, or setting confusion.
-2. Extract the reader promise being violated.
-3. Adjust future task queue first.
-4. Rewrite old chapters only when the initial promise itself is wrong.
+1. 分类为预期错位、角色反感、节奏疲劳、回报失败或设定困惑。
+2. 提取被违背的读者承诺。
+3. 优先调整后续任务队列。
+4. 只有初始承诺本身错误时，才重写旧章节。
 
-## Reporting Standard
+## 汇报标准
 
-Use evidence. Do not output vague praise or vague criticism.
+用证据说话。不要输出空泛夸奖或空泛批评。
 
-Good:
+较好：
 
 ```text
 - 节奏风险：第12-14章连续三章都在解释规则，只有第13章末尾有轻微信息反转；下一章应先兑现一次可见收益。
 ```
 
-Bad:
+较差：
 
 ```text
 - 节奏有点慢，建议加强。

@@ -1,11 +1,11 @@
 id: ai_tells
-name: AI 套语
-description: 检查高频 AI 微表情、抽象压迫和空泛华丽词，避免文本出现明显生成感。
+name: 生成腔套语
+description: 检查高频生成腔微表情、抽象压迫和空泛华丽词，避免文本出现明显生成感。
 severity: warning
 scope: full
 type: keywords
 threshold: 2
-message: "检测到高频 AI 套语，建议改写为更具体的动作、物体、声音或后果。"
+message: "检测到高频生成腔套语，建议改写为更具体的动作、物体、声音或后果。"
 keywords:
   - 瞳孔骤缩
   - 倒吸一口凉气

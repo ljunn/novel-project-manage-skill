@@ -97,6 +97,81 @@ REFERENCE_PATH_ALIASES = {
     "writing-quickref.md": "chapter/writing-quickref.md",
 }
 
+
+def localize_argparse_help(text: str) -> str:
+    return (
+        text.replace("usage:", "用法:")
+        .replace("positional arguments:", "位置参数:")
+        .replace("optional arguments:", "选项:")
+        .replace("options:", "选项:")
+        .replace("show this help message and exit", "显示此帮助信息并退出")
+    )
+
+
+CHINESE_METAVARS = {
+    "project_name": "项目名",
+    "project_path": "项目目录",
+    "chapter_num": "章节号",
+    "chapter_title": "章节标题",
+    "guidance": "引导",
+    "guidance_file": "引导文件",
+    "target_dir": "目标目录",
+    "target_total_words": "目标字数",
+    "target_volumes": "目标卷数",
+    "current_volume": "当前卷",
+    "current_phase": "当前阶段",
+    "phase_goal": "阶段目标",
+    "pending_setting_sync": "设定变更",
+    "chapter_path": "章节文件",
+    "rule_set": "规则集",
+    "report_path": "报告路径",
+    "summary": "摘要",
+    "word_count": "字数",
+    "scope": "范围",
+    "platform": "平台",
+    "audience": "读者",
+    "angle": "角度",
+    "prompt": "提示词",
+    "prompt_file": "提示词文件",
+    "ai_word": "词汇",
+    "reference": "参考文本",
+    "reference_file": "参考文件",
+    "output_file": "输出文件",
+    "input_path": "输入文件",
+    "kind": "类型",
+    "core_event": "核心事件",
+    "hook": "悬念钩子",
+    "next_goal": "下一章目标",
+    "viewpoint": "视角人物",
+    "protagonist_location": "主角位置",
+    "protagonist_state": "主角状态",
+    "stage": "创作阶段",
+    "plot_note": "伏笔备注",
+}
+
+
+class ChineseArgumentParser(argparse.ArgumentParser):
+    """让命令行帮助文本保持中文。"""
+
+    def add_argument(self, *args: Any, **kwargs: Any) -> argparse.Action:
+        if "metavar" not in kwargs and kwargs.get("action") not in {"store_true", "store_false", "help", "version"}:
+            dest = kwargs.get("dest")
+            option_strings = [arg for arg in args if isinstance(arg, str) and arg.startswith("-")]
+            if dest is None and option_strings:
+                dest = option_strings[-1].lstrip("-").replace("-", "_")
+            elif dest is None and args and isinstance(args[0], str):
+                dest = args[0]
+            if isinstance(dest, str) and dest in CHINESE_METAVARS:
+                kwargs["metavar"] = CHINESE_METAVARS[dest]
+        return super().add_argument(*args, **kwargs)
+
+    def format_usage(self) -> str:
+        return localize_argparse_help(super().format_usage())
+
+    def format_help(self) -> str:
+        return localize_argparse_help(super().format_help())
+
+
 RULE_LAYER_CATALOG: list[dict[str, Any]] = [
     {
         "id": "constitution",
@@ -124,14 +199,14 @@ RULE_LAYER_CATALOG: list[dict[str, Any]] = [
         "title": "规则化文本巡检",
         "kind": "rule-set",
         "sources": ["rules/novel-lint/*.yaml", "references/quality/rule-linting.md"],
-        "summary": "抓 AI 套语、结尾升华、视角越权、对白说明感、解释腔和转场过密。",
+        "summary": "抓 生成腔套语、结尾升华、视角越权、对白说明感、解释腔和转场过密。",
     },
     {
         "id": "consistency",
         "title": "连贯性检查清单",
         "kind": "checklist",
         "sources": ["references/quality/consistency.md", "references/quality/quality-checklist.md"],
-        "summary": "检查人物、伏笔、时间线、POV 边界和场景承接是否前后一致。",
+        "summary": "检查人物、伏笔、时间线、视角边界和场景承接是否前后一致。",
     },
 ]
 
@@ -158,19 +233,19 @@ WORKFLOW_LAYER_CATALOG: list[dict[str, Any]] = [
         "id": "marketing",
         "title": "商业化包装入口",
         "steps": ["resume", "作者意图", "当前焦点", "项目总纲/章节规划", "补充提示词/参考"],
-        "summary": "把营销包装所需的信息、提示词、词库和参考统一编译成营销 Brief。",
+        "summary": "把营销包装所需的信息、提示词、词库和参考统一编译成营销简报。",
     },
     {
         "id": "platform-gate",
         "title": "平台输出门禁",
         "steps": ["marketing", "platform-gate"],
-        "summary": "按平台约束检查章节稿或营销 Brief，输出轻量后处理报告。",
+        "summary": "按平台约束检查章节稿或营销简报，输出轻量后处理报告。",
     },
 ]
 
 COMMAND_LAYER_CATALOG: list[dict[str, Any]] = [
     {
-        "group": "Layer",
+        "group": "层级",
         "commands": [
             "rules",
             "workflows",
@@ -178,13 +253,13 @@ COMMAND_LAYER_CATALOG: list[dict[str, Any]] = [
         ],
     },
     {
-        "group": "Tool",
+        "group": "工具",
         "commands": [
             "platform-gate",
         ],
     },
     {
-        "group": "Workflow",
+        "group": "工作流",
         "commands": [
             "next-chapter",
             "review",
@@ -194,7 +269,7 @@ COMMAND_LAYER_CATALOG: list[dict[str, Any]] = [
         ],
     },
     {
-        "group": "Primitive",
+        "group": "基础命令",
         "commands": [
             "init",
             "preflight",
@@ -216,8 +291,8 @@ CONSISTENCY_MANUAL_CHECKS = [
     "人物行为符合既有性格设定",
     "伏笔有回扣或继续保持前台未决",
     "时间线与场景转场没有跳错",
-    "主 POV 稳定，没有同段乱切脑内",
-    "信息暴露符合 POV 边界，没有作者越权透题",
+    "主视角稳定，没有同段乱切脑内",
+    "信息暴露符合视角边界，没有作者越权透题",
 ]
 
 PLATFORM_GATE_PROFILES: dict[str, dict[str, Any]] = {
@@ -281,7 +356,7 @@ PLATFORM_GATE_PROFILES: dict[str, dict[str, Any]] = {
         "brief_focus": ["人物和关系质感清楚", "题材标签准确", "气质与冲突并存"],
         "brief_avoid": ["纯平台黑话堆砌", "只卖爽点不卖人物", "文案承诺和正文气质冲突"],
     },
-    "WebNovel": {
+    "起点国际": {
         "aliases": ["webnovel", "web novel"],
         "output_mode": "海外短更连载",
         "chapter_word_range": (1200, 3000),
@@ -654,7 +729,7 @@ def excerpt_text(text: str, keyword: str | None = None, max_chars: int = 600) ->
 TECHNIQUE_PROFILES: list[dict[str, Any]] = [
     {
         "id": "hook",
-        "label": "Opening hook / suspense",
+        "label": "开篇钩子 / 悬念",
         "keywords": ("开篇", "开头", "钩子", "悬念", "异常", "谜", "危险", "追读", "章尾", "来客", "雨夜"),
         "techniques": [
             "references/chapter/hook-techniques.md",
@@ -664,7 +739,7 @@ TECHNIQUE_PROFILES: list[dict[str, Any]] = [
     },
     {
         "id": "grounding",
-        "label": "Grounded scene / anti-summary",
+        "label": "场景落地 / 反概述",
         "keywords": ("场面", "细节", "画面", "悬浮", "梗概", "扩写", "干", "空", "氛围", "环境"),
         "techniques": [
             "references/chapter/descriptive-taxonomy.md",
@@ -674,7 +749,7 @@ TECHNIQUE_PROFILES: list[dict[str, Any]] = [
     },
     {
         "id": "dialogue",
-        "label": "Dialogue pressure",
+        "label": "对白压力",
         "keywords": ("对白", "对话", "口吻", "台词", "审问", "谈判", "争吵", "解释"),
         "techniques": [
             "references/chapter/dialogue-writing.md",
@@ -684,7 +759,7 @@ TECHNIQUE_PROFILES: list[dict[str, Any]] = [
     },
     {
         "id": "payoff",
-        "label": "Reader compensation / payoff",
+        "label": "读者补偿 / 回报",
         "keywords": ("回报", "爽点", "补偿", "翻盘", "揭秘", "升级", "奖励", "受挫", "压抑", "憋屈"),
         "techniques": [
             "references/chapter/reader-compensation.md",
@@ -694,7 +769,7 @@ TECHNIQUE_PROFILES: list[dict[str, Any]] = [
     },
     {
         "id": "daily",
-        "label": "Daily-life transition",
+        "label": "日常过渡",
         "keywords": ("日常", "过渡", "生活", "缓冲", "休整", "路上", "训练", "准备"),
         "techniques": [
             "references/chapter/daily-narrative.md",
@@ -704,18 +779,18 @@ TECHNIQUE_PROFILES: list[dict[str, Any]] = [
     },
     {
         "id": "ensemble",
-        "label": "Ensemble / multi-line coordination",
+        "label": "群像 / 多线协调",
         "keywords": ("群像", "多线", "多视角", "双线", "阵营", "势力", "会议", "朝堂"),
         "techniques": [
             "references/chapter/ensemble-writing.md",
             "references/quality/consistency.md",
         ],
-        "reason": "多人物或多线章节需要控制 POV、前台主线和关系变化。",
+        "reason": "多人物或多线章节需要控制视角、前台主线和关系变化。",
     },
     {
         "id": "revision",
-        "label": "Revision / anti-AI prose",
-        "keywords": ("润色", "重写", "返修", "AI味", "去AI", "抽象", "说教", "总结", "微调"),
+        "label": "返修 / 去生成腔",
+        "keywords": ("润色", "重写", "返修", "生成腔", "去生成腔", "抽象", "说教", "总结", "微调"),
         "techniques": [
             "references/quality/micro-revision-ops.md",
             "references/quality/anti-ai-rewrite.md",
@@ -724,7 +799,7 @@ TECHNIQUE_PROFILES: list[dict[str, Any]] = [
     },
     {
         "id": "governance",
-        "label": "Long-form governance",
+        "label": "长篇治理",
         "keywords": ("分卷", "阶段", "卷末", "长篇", "百万", "治理", "审计", "结构"),
         "techniques": [
             "references/governance/longform-governance.md",
@@ -785,7 +860,7 @@ def recommend_techniques(summary: dict, chapter_title: str | None, guidance: str
     if not matched:
         matched.append({
             "id": "default-hook-payoff",
-            "label": "Default serial pull",
+            "label": "默认连载牵引",
             "reason": "未命中特定问题，默认加强章节钩子与读者回报。",
             "matched_keywords": [],
             "techniques": [
@@ -799,20 +874,20 @@ def recommend_techniques(summary: dict, chapter_title: str | None, guidance: str
 
 def render_recommended_technique_stack(recommendations: list[dict[str, Any]]) -> list[str]:
     lines = [
-        "## Recommended Technique Stack",
+        "## 推荐技巧栈",
         "",
-        "- Baseline: `references/chapter/writing-quickref.md` + `references/chapter/chapter-workflow.md`",
+        "- 基线：`references/chapter/writing-quickref.md` + `references/chapter/chapter-workflow.md`",
     ]
     for index, item in enumerate(recommendations, start=1):
-        role = "Main" if index == 1 else f"Support {index - 1}"
-        hits = "、".join(item.get("matched_keywords", [])) or "default"
+        role = "主技巧" if index == 1 else f"支撑技巧 {index - 1}"
+        hits = "、".join(item.get("matched_keywords", [])) or "默认"
         lines.append(f"- {role}: {item['label']}")
-        lines.append(f"  - Why: {item['reason']} (signals: {hits})")
+        lines.append(f"  - 原因：{item['reason']}（信号：{hits}）")
         for technique in item.get("techniques", []):
-            lines.append(f"  - Read: `{technique}`")
+            lines.append(f"  - 阅读：`{technique}`")
     lines += [
         "",
-        "Use only these technique labels in working notes. Do not put technique names, beat labels, or scene-card headings into the manuscript.",
+        "这些技巧标签只用于工作笔记。不要把技巧名、节拍标签或场景卡标题写进正文。",
         "",
     ]
     return lines
@@ -1087,33 +1162,33 @@ def build_chapter_intent(
     conflict_lines = [f"- {item}" for item in conflicts] or ["- 暂无"]
 
     lines = [
-        "# Chapter Intent",
+        "# 章节意图",
         "",
-        f"## Chapter",
+        "## 章节",
         f"第{chapter_num}章" + (f"：{chapter_title}" if chapter_title else ""),
         "",
-        "## Goal",
+        "## 目标",
         goal,
         "",
-        "## Scope",
+        "## 范围",
         f"- 当前卷：{summary.get('current_volume', '未记录')}",
         f"- 当前阶段：{summary.get('current_phase', '未记录')}",
         f"- 当前阶段目标：{summary.get('phase_goal', '未记录')}",
         "",
-        "## Must Keep",
+        "## 必须保留",
         *must_keep_lines,
         "",
-        "## Must Avoid",
+        "## 必须避免",
         *must_avoid_lines,
         "",
-        "## Conflicts",
+        "## 冲突压力",
         *conflict_lines,
         "",
-        "## Hook Agenda",
-        "### Must Advance",
+        "## 伏笔议程",
+        "### 必须推进",
         *hook_lines,
         "",
-        "## Inputs",
+        "## 输入材料",
         *source_lines,
         "",
     ]
@@ -1133,29 +1208,29 @@ def build_chapter_intent(
         kb_queries.append("网文章节续写")
 
     lines += [
-        "## Knowledge Base Query（可选增强）",
+        "## 知识库查询（可选增强）",
         "",
-        "若当前环境提供知识库 / MCP / 搜索工具，可在正文前先检索相关参考材料；若没有，直接跳过。",
+        "若当前环境提供知识库、外部工具服务或搜索工具，可在正文前先检索相关参考材料；若没有，直接跳过。",
         "",
         "建议查询关键词（从本章目标和活跃伏笔中提取，可按需调整）：",
         *[f"- {q}" for q in kb_queries],
         "",
         "执行建议：",
         "- 优先查询与本章目标、活跃伏笔直接相关的案例、方法论或结构参考",
-        "- 查询结果只作补充参考；若与 Goal / Must Keep / Writing Quick Reference 冲突，以后者为准",
+        "- 查询结果只作补充参考；若与本章目标、必须保留项、写作速查冲突，以后者为准",
         "- 当前环境没有可用工具时，跳过本节，不影响后续流程",
         "",
     ]
 
     quickref_path = resolve_reference_file("writing-quickref.md", project_dir=project_dir)
     if quickref_path is not None:
-        lines += ["## Writing Quick Reference", ""]
+        lines += ["## 写作速查", ""]
         lines += quickref_path.read_text(encoding="utf-8").strip().splitlines()
         lines.append("")
 
     technique_stack_path = resolve_reference_file("technique-stack.md", project_dir=project_dir)
     if technique_stack_path is not None:
-        lines += ["## Technique Stack Selection", ""]
+        lines += ["## 技巧栈选择", ""]
         lines += technique_stack_path.read_text(encoding="utf-8").strip().splitlines()
         lines.append("")
 
@@ -1259,7 +1334,7 @@ def render_rule_stack_yaml(summary: dict, chapter_num: int, chapter_title: str |
 
 
 def build_scene_cards(summary: dict, chapter_num: int, chapter_title: str | None, guidance: str) -> str:
-    pov = first_meaningful_value(summary.get("viewpoint")) or "主 POV"
+    pov = first_meaningful_value(summary.get("viewpoint")) or "主视角"
     location = first_meaningful_value(summary.get("protagonist_location")) or "当前主要场域"
     goal = first_meaningful_value(guidance, summary.get("phase_goal"), summary.get("next_goal")) or "推进当前主线"
     state = first_meaningful_value(summary.get("protagonist_state")) or "带着未结问题入场"
@@ -1320,21 +1395,21 @@ def build_scene_cards(summary: dict, chapter_num: int, chapter_title: str | None
     ]
 
     lines = [
-        "# Scene Cards",
+        "# 场景卡",
         "",
-        "## Chapter",
+        "## 章节",
         f"第{chapter_num}章" + (f"：{chapter_title}" if chapter_title else ""),
         "",
-        "## Usage",
+        "## 用法",
         "- 默认按 3-5 场编排，不是固定三场景模板。",
         "- 场景一 / 三 / 五是骨架；场景二 / 四按章节类型增删。",
         "- 过渡章可只保留 3 场，悬疑章 / 群像章 / 高潮章可扩到 4-5 场。",
         "",
-        "## Runtime Summary",
+        "## 运行摘要",
         f"- 当前卷：{summary.get('current_volume', '未记录')}",
         f"- 当前阶段：{summary.get('current_phase', '未记录')}",
         f"- 当前阶段目标：{summary.get('phase_goal', '未记录')}",
-        f"- 主 POV：{pov}",
+        f"- 主视角：{pov}",
         f"- 主角位置：{location}",
         f"- 主角状态：{state}",
         f"- 本章总目标：{goal}",
@@ -1346,7 +1421,7 @@ def build_scene_cards(summary: dict, chapter_num: int, chapter_title: str | None
             scene["title"],
             f"- 类型：{scene['tag']}",
             f"- 地点：{location}",
-            f"- POV：{pov}",
+            f"- 视角：{pov}",
             f"- 场景功能：{scene['function']}",
             f"- 谁想要什么：{scene['want']}",
             f"- 谁阻止谁：{scene['block']}",
@@ -1415,7 +1490,7 @@ def materialize_runtime_package(project_dir: Path, summary: dict, chapter_num: i
         "recommendedTechniqueStack": plan_result["technique_stack"],
         "notes": [
             "本章运行时产物由本地项目记忆编译生成，不依赖在线 LLM。",
-            "如需同类案例或范本，另行通过知识库 / MCP / 搜索工具查询。",
+            "如需同类案例或范本，另行通过知识库、外部工具服务或搜索工具查询。",
             "如果本章目标或上下文变化，应重新执行 plan / compose。",
         ],
     }
@@ -1701,7 +1776,7 @@ def build_consistency_report(
 
     pov_findings = [item for item in (lint_findings or []) if item.get("id") == "pov_leak"]
     if pov_findings:
-        issues.append(f"命中 {len(pov_findings)} 条 POV 越权提示")
+        issues.append(f"命中 {len(pov_findings)} 条视角越权提示")
 
     return {
         "file": str(chapter_path),
@@ -1733,7 +1808,7 @@ def print_consistency_summary(report: dict[str, Any]) -> None:
     print(f"- 章节号: {report.get('chapter_num') or '未知'}")
     print(f"- 上一章: {report.get('previous_chapter') or '未定位'}")
     print(f"- 下一章: {report.get('next_chapter') or '未定位'}")
-    print(f"- 预期 POV: {report['expected']['viewpoint']}")
+    print(f"- 预期视角: {report['expected']['viewpoint']}")
     print(f"- 预期主角位置: {report['expected']['protagonist_location']}")
     print(f"- 预期主角状态: {report['expected']['protagonist_state']}")
     print(f"- 当前阶段目标: {report['expected']['phase_goal']}")
@@ -1826,10 +1901,10 @@ def build_review_dossier(
         },
         {
             "id": "pov_boundary",
-            "title": "POV 边界",
+            "title": "视角边界",
             "status": "warn" if pov_hit else "manual",
-            "reason": "规则命中可能的视角越权表达。" if pov_hit else "未命中静态 POV 规则，但是否越权仍需人工/模型逐段判断。",
-            "evidence": [f"预期 POV={consistency_report['expected']['viewpoint']}"],
+            "reason": "规则命中可能的视角越权表达。" if pov_hit else "未命中静态视角规则，但是否越权仍需人工/模型逐段判断。",
+            "evidence": [f"预期视角={consistency_report['expected']['viewpoint']}"],
             "signals": [item["name"] for item in lint_findings if item.get("id") == "pov_leak"],
         },
         {
@@ -1867,7 +1942,7 @@ def build_review_dossier(
             "question": "本章是否让关键人物关系、站位或认知发生了可感知变化？",
             "why": "没有关系变化，很多章节会只剩事件播报。",
             "evidence": [
-                f"预期 POV：{consistency_report['expected']['viewpoint']}",
+                f"预期视角：{consistency_report['expected']['viewpoint']}",
                 excerpt_text(opening_excerpt, max_chars=160),
                 excerpt_text(ending_excerpt, max_chars=160),
             ],
@@ -1889,9 +1964,9 @@ def build_review_dossier(
         },
         {
             "id": "pov_and_information",
-            "question": "正文是否始终贴紧主 POV，没有偷偷宣布别人的内心、判断或群体认知？",
+            "question": "正文是否始终贴紧主视角，没有偷偷宣布别人的内心、判断或群体认知？",
             "why": "这是连载稳定性和沉浸感的硬边界。",
-            "evidence": [f"预期 POV：{consistency_report['expected']['viewpoint']}"] + [
+            "evidence": [f"预期视角：{consistency_report['expected']['viewpoint']}"] + [
                 excerpt_text(item["excerpt"], max_chars=120) for item in sum((finding.get("evidence", [])[:1] for finding in lint_findings if finding.get("id") == "pov_leak"), [])
             ],
         },
@@ -1968,7 +2043,7 @@ def build_review_report(chapter_path: Path, project_dir: Path | None = None) -> 
         "explanation_tone": "把说明句改写成动作、代价和后果",
         "dialogue_exposition": "压缩对白说明感，避免人物替作者讲设定",
         "transition_overexplained": "删掉过桥连接词堆积，让因果落回场面",
-        "ai_tells": "把抽象 AI 套语换成具体物体、动作和关系压力",
+        "ai_tells": "把抽象 生成腔套语换成具体物体、动作和关系压力",
         "abstract_psychology": "把抽象心理直说改写成动作、反应、停顿和后果",
     }
     for finding in lint_findings:
@@ -2111,7 +2186,7 @@ def render_review_report_markdown(report: dict[str, Any]) -> str:
         "",
         f"- 上一章：`{consistency.get('previous_chapter') or '未定位'}`",
         f"- 下一章：`{consistency.get('next_chapter') or '未定位'}`",
-        f"- 预期 POV：{consistency['expected']['viewpoint']}",
+        f"- 预期视角：{consistency['expected']['viewpoint']}",
         f"- 当前卷：{consistency['expected']['current_volume']}",
         f"- 当前阶段：{consistency['expected']['current_phase']}",
         f"- 当前阶段目标：{consistency['expected']['phase_goal']}",
@@ -2170,7 +2245,7 @@ def render_review_report_markdown(report: dict[str, Any]) -> str:
     lines += [
         "## 返修参考",
         "",
-        "- `references/quality/anti-ai-rewrite.md`：去 AI 味返修的三档强度、四类病灶和保钩子规则。",
+        "- `references/quality/anti-ai-rewrite.md`：去生成腔返修的三档强度、四类病灶和保钩子规则。",
         "- `references/quality/review-reporting.md`：审阅报告目录、命名和落盘约定。",
         "",
     ]
@@ -2403,7 +2478,7 @@ def build_marketing_brief(
 
     compiled_prompt_lines = [
         "你是平台向网文商业化包装助手。",
-        "请基于下面的项目 Brief 输出：书名备选、平台卖点一句话、长简介、渠道文案、章节推送钩子、读者承诺。",
+        "请基于下面的项目简报输出：书名备选、平台卖点一句话、长简介、渠道文案、章节推送钩子、读者承诺。",
         "不要把故事写成纯文学自嗨文案；优先突出题材钩子、长期回报、人物冲突和追读牵引。",
     ]
     if platform:
@@ -2414,13 +2489,13 @@ def build_marketing_brief(
         compiled_prompt_lines.append(f"本次主打商业角度：{angle}")
     compiled_prompt_lines.extend(f"补充提示词：{item}" for item in extra_prompts)
     if ai_words:
-        compiled_prompt_lines.append("可用商业词/AI 味词汇：" + " / ".join(ai_words))
+        compiled_prompt_lines.append("可用商业词/生成腔词汇：" + " / ".join(ai_words))
     if references:
         compiled_prompt_lines.append("补充参考材料：")
         compiled_prompt_lines.extend(f"参考：{item}" for item in references)
 
     brief_lines = [
-        f"# Marketing Brief - {summary['book_title']}",
+        f"# 营销简报 - {summary['book_title']}",
         "",
         "## 项目定位",
         f"- 书名：{summary['book_title']}",
@@ -2459,7 +2534,7 @@ def build_marketing_brief(
         "## 活跃伏笔与钩子压力",
         *(summary.get("active_plots", []) or ["- 暂无活跃伏笔"]),
         "",
-        "## 可复用营销 Prompt",
+        "## 可复用营销 提示词",
         *[f"- {line}" for line in compiled_prompt_lines],
         "",
         "## 补充词库",
@@ -2988,16 +3063,16 @@ def build_platform_chapter_gate_report(
         },
         {
             "id": "ai_density",
-            "title": "AI 痕迹密度",
+            "title": "生成腔痕迹密度",
             "status": "warn" if ai_like_hits else "pass",
-            "reason": "命中解释腔 / 抽象心理 / AI 套语等静态信号。" if ai_like_hits else "静态规则未见明显 AI 痕迹聚集。",
+            "reason": "命中解释腔 / 抽象心理 / 生成腔套语等静态信号。" if ai_like_hits else "静态规则未见明显 生成腔痕迹聚集。",
             "evidence": [item["name"] for item in ai_like_hits[:4]] or ["无"],
         },
         {
             "id": "pov_boundary",
-            "title": "POV 边界",
+            "title": "视角边界",
             "status": "warn" if pov_hits else "pass",
-            "reason": "命中可能的 POV 越权信号。" if pov_hits else "静态规则未见明显 POV 越权信号。",
+            "reason": "命中可能的视角越权信号。" if pov_hits else "静态规则未见明显视角越权信号。",
             "evidence": [item["name"] for item in pov_hits[:3]] or ["无"],
         },
     ]
@@ -3015,9 +3090,9 @@ def build_platform_chapter_gate_report(
         elif check["id"] == "dialogue_load" and check["status"] == "warn":
             actions.append("把部分对白说明感转移到动作、环境和关系压力里。")
         elif check["id"] == "ai_density" and check["status"] == "warn":
-            actions.append("按 `references/quality/anti-ai-rewrite.md` 做轻到中档去味返修。")
+            actions.append("按 `references/quality/anti-ai-rewrite.md` 做轻到中档去生成腔返修。")
         elif check["id"] == "pov_boundary" and check["status"] == "warn":
-            actions.append("逐段确认信息是否仍贴紧当前 POV，删掉越权宣布。")
+            actions.append("逐段确认信息是否仍贴紧当前视角，删掉越权宣布。")
 
     if not actions:
         actions.append("平台门禁未见明显硬伤，进入人工平台适配润色即可。")
@@ -3043,7 +3118,7 @@ def build_platform_marketing_gate_report(input_path: Path, canonical_platform: s
             "kind": "marketing",
             "verdict": "fail",
             "checks": [{"id": "missing_file", "title": "输入文件", "status": "fail", "reason": "文件不存在或为空", "evidence": []}],
-            "actions": ["先生成可读的营销 Brief，再执行平台门禁。"],
+            "actions": ["先生成可读的营销简报，再执行平台门禁。"],
             "platform_focus": profile.get("brief_focus", []),
             "platform_avoid": profile.get("brief_avoid", []),
         }
@@ -3057,7 +3132,7 @@ def build_platform_marketing_gate_report(input_path: Path, canonical_platform: s
         "近期宣传焦点",
         "最近剧情抓手",
         "活跃伏笔与钩子压力",
-        "可复用营销 Prompt",
+            "可复用营销提示词",
     ]
     platform_sections = required_sections + ["平台输出门禁"]
     missing_sections = [item for item in platform_sections if item not in headings]
@@ -3068,45 +3143,45 @@ def build_platform_marketing_gate_report(input_path: Path, canonical_platform: s
     checks = [
         {
             "id": "required_sections",
-            "title": "核心 Section 完整度",
+            "title": "核心板块完整度",
             "status": "fail" if missing_sections else "pass",
-            "reason": "Brief 缺少关键 Section，平台包装信息不完整。" if missing_sections else "核心营销 Section 已齐备。",
-            "evidence": missing_sections or ["关键 Section 已覆盖"],
+            "reason": "营销简报缺少关键板块，平台包装信息不完整。" if missing_sections else "核心营销板块已齐备。",
+            "evidence": missing_sections or ["关键板块已覆盖"],
         },
         {
             "id": "section_substance",
-            "title": "核心 Section 实质内容",
+            "title": "核心板块实质内容",
             "status": "warn" if placeholder_sections else "pass",
-            "reason": "部分核心 Section 仍是占位框架或空内容。" if placeholder_sections else "核心 Section 已提供可用内容。",
-            "evidence": placeholder_sections or ["核心 Section 未见明显占位内容"],
+            "reason": "部分核心板块仍是占位框架或空内容。" if placeholder_sections else "核心板块已提供可用内容。",
+            "evidence": placeholder_sections or ["核心板块未见明显占位内容"],
         },
         {
             "id": "brief_length",
-            "title": "Brief 体量",
+            "title": "营销简报体量",
             "status": "warn" if len(text.strip()) < 500 else "pass",
-            "reason": "Brief 偏短，可能不足以支撑平台包装和后续改写。" if len(text.strip()) < 500 else "Brief 体量可供后续平台包装复用。",
+            "reason": "营销简报偏短，可能不足以支撑平台包装和后续改写。" if len(text.strip()) < 500 else "营销简报体量可供后续平台包装复用。",
             "evidence": [f"字符数={len(text.strip())}"],
         },
         {
             "id": "platform_mention",
             "title": "平台指向",
             "status": "warn" if canonical_platform not in text else "pass",
-            "reason": "Brief 中未明确出现目标平台名，后续改写容易跑偏。" if canonical_platform not in text else "Brief 已明确写出目标平台。",
+            "reason": "营销简报中未明确出现目标平台名，后续改写容易跑偏。" if canonical_platform not in text else "营销简报已明确写出目标平台。",
             "evidence": [canonical_platform],
         },
     ]
 
     actions: list[str] = []
     if missing_sections:
-        actions.append("先补齐缺失的核心 Section，再拿这份 Brief 继续做平台输出。")
+        actions.append("先补齐缺失的核心板块，再拿这份营销简报继续做平台输出。")
     if placeholder_sections:
-        actions.append("先把占位 Section 补成可执行内容，再把这份 Brief 当母稿使用。")
+        actions.append("先把占位板块补成可执行内容，再把这份营销简报当母稿使用。")
     if len(text.strip()) < 500:
         actions.append("补充最近剧情抓手、长期卖点和活跃伏笔，不要只留空框架。")
     if canonical_platform not in text:
         actions.append("在项目定位或平台输出门禁中明确写出目标平台。")
     if not actions:
-        actions.append("这份 Brief 已可作为平台适配母稿，继续按平台重点做定向润色。")
+        actions.append("这份营销简报已可作为平台适配母稿，继续按平台重点做定向润色。")
 
     return {
         "input": str(input_path),
@@ -3213,17 +3288,17 @@ def handle_platform_gate(args: argparse.Namespace) -> int:
 
 
 def handle_rules(args: argparse.Namespace) -> int:
-    print_layer_catalog("Rule Layer", RULE_LAYER_CATALOG, json_mode=args.json)
+    print_layer_catalog("规则层", RULE_LAYER_CATALOG, json_mode=args.json)
     return 0
 
 
 def handle_workflows(args: argparse.Namespace) -> int:
-    print_layer_catalog("Workflow Layer", WORKFLOW_LAYER_CATALOG, json_mode=args.json)
+    print_layer_catalog("工作流层", WORKFLOW_LAYER_CATALOG, json_mode=args.json)
     return 0
 
 
 def handle_commands(args: argparse.Namespace) -> int:
-    print_layer_catalog("Command Layer", COMMAND_LAYER_CATALOG, json_mode=args.json)
+    print_layer_catalog("命令层", COMMAND_LAYER_CATALOG, json_mode=args.json)
     return 0
 
 
@@ -3508,19 +3583,19 @@ def handle_audit(args: argparse.Namespace) -> int:
 
 
 def build_parser() -> argparse.ArgumentParser:
-    parser = argparse.ArgumentParser(description="小说项目统一工作流入口")
-    subparsers = parser.add_subparsers(dest="command", required=True)
+    parser = ChineseArgumentParser(description="小说项目统一工作流入口")
+    subparsers = parser.add_subparsers(dest="command", required=True, parser_class=ChineseArgumentParser)
 
-    rules_parser = subparsers.add_parser("rules", help="查看 Rule 层索引")
-    rules_parser.add_argument("--json", action="store_true", help="输出 JSON")
+    rules_parser = subparsers.add_parser("rules", help="查看规则层索引")
+    rules_parser.add_argument("--json", action="store_true", help="输出结构化数据")
     rules_parser.set_defaults(handler=handle_rules)
 
-    workflows_parser = subparsers.add_parser("workflows", help="查看 Workflow 层索引")
-    workflows_parser.add_argument("--json", action="store_true", help="输出 JSON")
+    workflows_parser = subparsers.add_parser("workflows", help="查看工作流层索引")
+    workflows_parser.add_argument("--json", action="store_true", help="输出结构化数据")
     workflows_parser.set_defaults(handler=handle_workflows)
 
-    commands_parser = subparsers.add_parser("commands", help="查看 Command 层索引")
-    commands_parser.add_argument("--json", action="store_true", help="输出 JSON")
+    commands_parser = subparsers.add_parser("commands", help="查看命令层索引")
+    commands_parser.add_argument("--json", action="store_true", help="输出结构化数据")
     commands_parser.set_defaults(handler=handle_commands)
 
     init_parser = subparsers.add_parser("init", help="初始化小说项目")
@@ -3547,7 +3622,7 @@ def build_parser() -> argparse.ArgumentParser:
     plan_parser.add_argument("--chapter-title", help="目标章节标题")
     plan_parser.add_argument("--guidance", help="本章额外引导")
     plan_parser.add_argument("--guidance-file", help="从文件读取本章引导")
-    plan_parser.add_argument("--json", action="store_true", help="输出 JSON")
+    plan_parser.add_argument("--json", action="store_true", help="输出结构化数据")
     plan_parser.set_defaults(handler=handle_plan)
 
     compose_parser = subparsers.add_parser("compose", help="生成本章运行时上下文/规则栈/轨迹")
@@ -3556,7 +3631,7 @@ def build_parser() -> argparse.ArgumentParser:
     compose_parser.add_argument("--chapter-title", help="目标章节标题")
     compose_parser.add_argument("--guidance", help="本章额外引导")
     compose_parser.add_argument("--guidance-file", help="从文件读取本章引导")
-    compose_parser.add_argument("--json", action="store_true", help="输出 JSON")
+    compose_parser.add_argument("--json", action="store_true", help="输出结构化数据")
     compose_parser.set_defaults(handler=handle_compose)
 
     governance_parser = subparsers.add_parser("governance", help="同步超长篇治理状态")
@@ -3590,19 +3665,19 @@ def build_parser() -> argparse.ArgumentParser:
     lint_parser = subparsers.add_parser("lint", help="按规则检查单章")
     lint_parser.add_argument("chapter_path", help="章节文件路径")
     lint_parser.add_argument("--rule-set", default="novel-lint", help="规则集目录名，默认 novel-lint")
-    lint_parser.add_argument("--json", action="store_true", help="输出 JSON")
+    lint_parser.add_argument("--json", action="store_true", help="输出结构化数据")
     lint_parser.set_defaults(handler=handle_lint)
 
     dialogue_parser = subparsers.add_parser("dialogue-pass", help="对白专审")
     dialogue_parser.add_argument("chapter_path", help="章节文件路径")
     dialogue_parser.add_argument("--rule-set", default="novel-lint", help="规则集目录名，默认 novel-lint")
-    dialogue_parser.add_argument("--json", action="store_true", help="输出 JSON")
+    dialogue_parser.add_argument("--json", action="store_true", help="输出结构化数据")
     dialogue_parser.set_defaults(handler=handle_dialogue_pass)
 
     consistency_parser = subparsers.add_parser("consistency", help="连贯性结构化检查")
     consistency_parser.add_argument("chapter_path", help="章节文件路径")
     consistency_parser.add_argument("--project-path", help="项目根目录；不传则尝试自动定位")
-    consistency_parser.add_argument("--json", action="store_true", help="输出 JSON")
+    consistency_parser.add_argument("--json", action="store_true", help="输出结构化数据")
     consistency_parser.set_defaults(handler=handle_consistency)
 
     review_parser = subparsers.add_parser("review", help="生成静态预审 + 审稿稿本，不再冒充已完成语义审稿")
@@ -3610,7 +3685,7 @@ def build_parser() -> argparse.ArgumentParser:
     review_parser.add_argument("--project-path", help="项目根目录；不传则尝试自动定位")
     review_parser.add_argument("--report-path", help="显式指定审阅报告输出路径；默认自动落到 <项目目录>/审阅意见/")
     review_parser.add_argument("--no-write-report", action="store_true", help="只输出终端摘要，不落审阅报告文件")
-    review_parser.add_argument("--json", action="store_true", help="输出 JSON")
+    review_parser.add_argument("--json", action="store_true", help="输出结构化数据")
     review_parser.set_defaults(handler=handle_review)
 
     finish_parser = subparsers.add_parser("finish", help="检查并同步章节完成状态")
@@ -3635,31 +3710,31 @@ def build_parser() -> argparse.ArgumentParser:
     next_chapter_parser.add_argument("--summary", help="本章摘要；与 --chapter-path 一起触发 finish")
     next_chapter_parser.add_argument("--word-count", type=int, help="手动指定章节字数")
     next_chapter_parser.add_argument("--skip-checks", action="store_true", help="finish 时跳过写后检查")
-    next_chapter_parser.add_argument("--json", action="store_true", help="输出 JSON")
+    next_chapter_parser.add_argument("--json", action="store_true", help="输出结构化数据")
     add_progress_option_arguments(next_chapter_parser)
     next_chapter_parser.set_defaults(handler=handle_next_chapter)
 
-    marketing_parser = subparsers.add_parser("marketing", help="生成商业化包装 Brief / Prompt Pack")
+    marketing_parser = subparsers.add_parser("marketing", help="生成商业化包装营销简报与提示词包")
     marketing_parser.add_argument("project_path", help="项目根目录")
     marketing_parser.add_argument("--platform", help="目标平台")
     marketing_parser.add_argument("--audience", help="目标读者")
     marketing_parser.add_argument("--angle", help="本次主打商业角度")
     marketing_parser.add_argument("--prompt", action="append", help="补充提示词，可重复传入")
     marketing_parser.add_argument("--prompt-file", action="append", help="从文件补充提示词，可重复传入")
-    marketing_parser.add_argument("--ai-word", action="append", help="补充商业词/AI 味词汇，可重复传入")
+    marketing_parser.add_argument("--ai-word", action="append", help="补充商业词/生成腔词汇，可重复传入")
     marketing_parser.add_argument("--reference", action="append", help="补充参考文本，可重复传入")
     marketing_parser.add_argument("--reference-file", action="append", help="从文件补充参考，可重复传入")
-    marketing_parser.add_argument("--output-file", help="将营销 Brief 写入文件")
-    marketing_parser.add_argument("--json", action="store_true", help="输出 JSON")
+    marketing_parser.add_argument("--output-file", help="将营销简报写入文件")
+    marketing_parser.add_argument("--json", action="store_true", help="输出结构化数据")
     marketing_parser.set_defaults(handler=handle_marketing)
 
-    platform_gate_parser = subparsers.add_parser("platform-gate", help="按平台约束检查章节稿或营销 Brief")
+    platform_gate_parser = subparsers.add_parser("platform-gate", help="按平台约束检查章节稿或营销简报")
     platform_gate_parser.add_argument("input_path", help="待检查文件路径")
     platform_gate_parser.add_argument("--platform", required=True, help="目标平台，例如 起点中文网 / 番茄小说网 / 知乎盐选")
     platform_gate_parser.add_argument("--kind", choices=("chapter", "marketing"), default="chapter", help="检查类型")
     platform_gate_parser.add_argument("--project-path", help="项目根目录；chapter 模式下不传则尝试自动定位")
     platform_gate_parser.add_argument("--output-file", help="将门禁报告写入文件")
-    platform_gate_parser.add_argument("--json", action="store_true", help="输出 JSON")
+    platform_gate_parser.add_argument("--json", action="store_true", help="输出结构化数据")
     platform_gate_parser.set_defaults(handler=handle_platform_gate)
 
     return parser

@@ -1,4 +1,4 @@
-# 商业化包装与营销 Brief
+# 商业化包装与营销简报
 
 用于把小说项目从“能写”补到“能卖、能推、能讲”。
 
@@ -22,13 +22,13 @@
 额外可以补进来：
 
 - 补充提示词
-- AI 味词汇 / 商业词库
+- 生成腔词汇 / 商业词库
 - 参考文案
 - 额外参考文件
 
 ## 默认输出
 
-`marketing` 产出的 Brief 至少应覆盖：
+`marketing` 产出的营销简报至少应覆盖：
 
 - 项目定位
 - 长期卖点
@@ -36,7 +36,7 @@
 - 最近 1-3 章宣传焦点
 - 最近剧情抓手
 - 活跃伏笔与钩子压力
-- 一份可复用营销 Prompt
+- 一份可复用营销提示词
 - 补充词库
 - 参考摘录
 
@@ -77,8 +77,8 @@ python3 scripts/chapter_pipeline.py marketing <项目目录> \
 
 ```bash
 python3 scripts/chapter_pipeline.py marketing <项目目录> \
-  --reference "参考某类平台简介的节奏和钩子密度" \
-  --reference-file ./notes/marketing-reference.md
+  --参考文件 "参考某类平台简介的节奏和钩子密度" \
+  --参考文件-file ./notes/marketing-参考文件.md
 ```
 
 写入文件：
@@ -88,7 +88,7 @@ python3 scripts/chapter_pipeline.py marketing <项目目录> \
   --output-file ./runtime/marketing-brief.md
 ```
 
-对生成后的 Brief 继续跑平台门禁：
+对生成后的营销简报继续跑平台门禁：
 
 ```bash
 python3 scripts/chapter_pipeline.py platform-gate ./runtime/marketing-brief.md \
@@ -100,7 +100,7 @@ python3 scripts/chapter_pipeline.py platform-gate ./runtime/marketing-brief.md \
 
 1. 商业化包装不能和 `docs/作者意图.md` 的长期承诺打架。
 2. 文案强调卖点时，不能偷改作品真正的题材和主承诺。
-3. AI 味词汇只作为辅助，不要让文案全变成平台黑话堆砌。
+3. 生成腔词汇只作为辅助，不要让文案全变成平台黑话堆砌。
 4. 参考材料只吸收结构、角度和节奏，不直接照搬别人文案。
 5. 最近 1-3 章的宣传重点，应服务当前阶段目标，而不是乱开新坑。
-6. 生成 Brief 后，优先再跑一次 `platform-gate` 做后处理检查。
+6. 生成营销简报后，优先再跑一次 `platform-gate` 做后处理检查。

@@ -18,6 +18,44 @@ REFERENCE_TEMPLATE_ALIASES = {
 }
 
 
+def localize_argparse_help(text: str) -> str:
+    return (
+        text.replace("usage:", "用法:")
+        .replace("positional arguments:", "位置参数:")
+        .replace("optional arguments:", "选项:")
+        .replace("options:", "选项:")
+        .replace("show this help message and exit", "显示此帮助信息并退出")
+    )
+
+
+CHINESE_METAVARS = {
+    "project_name": "项目名",
+    "target_dir": "目标目录",
+}
+
+
+class ChineseArgumentParser(argparse.ArgumentParser):
+    """让命令行帮助文本保持中文。"""
+
+    def add_argument(self, *args: str, **kwargs: object) -> argparse.Action:
+        if "metavar" not in kwargs and kwargs.get("action") not in {"store_true", "store_false", "help", "version"}:
+            dest = kwargs.get("dest")
+            option_strings = [arg for arg in args if isinstance(arg, str) and arg.startswith("-")]
+            if dest is None and option_strings:
+                dest = option_strings[-1].lstrip("-").replace("-", "_")
+            elif dest is None and args and isinstance(args[0], str):
+                dest = args[0]
+            if isinstance(dest, str) and dest in CHINESE_METAVARS:
+                kwargs["metavar"] = CHINESE_METAVARS[dest]
+        return super().add_argument(*args, **kwargs)
+
+    def format_usage(self) -> str:
+        return localize_argparse_help(super().format_usage())
+
+    def format_help(self) -> str:
+        return localize_argparse_help(super().format_help())
+
+
 def resolve_reference_path(filename: str) -> Path | None:
     candidates: list[Path] = []
     mapped = REFERENCE_TEMPLATE_ALIASES.get(filename)
@@ -295,9 +333,9 @@ def build_ensemble_theme_template() -> str:
 
 
 def build_pov_rotation_template() -> str:
-    return """# POV轮转表
+    return """# 视角轮转表
 
-| 章节 | 主POV | 次POV（可选） | 主线任务 | 备注 |
+| 章节 | 主视角 | 次视角（可选） | 主线任务 | 备注 |
 |------|-------|---------------|----------|------|
 | 第1章 | | | | |
 | 第2章 | | | | |
@@ -549,7 +587,7 @@ def create_novel_project(
 
     if mode in {"dual", "ensemble"}:
         files[project_dir / "docs" / "群像主题拆分.md"] = build_ensemble_theme_template()
-        files[project_dir / "plot" / "POV轮转表.md"] = build_pov_rotation_template()
+        files[project_dir / "plot" / "视角轮转表.md"] = build_pov_rotation_template()
 
     if complex_relationships or romance_focus:
         files[project_dir / "docs" / "关系图.md"] = build_relationship_map_template()
@@ -564,7 +602,7 @@ def create_novel_project(
 
 
 def parse_args() -> argparse.Namespace:
-    parser = argparse.ArgumentParser(description="创建长篇小说项目结构")
+    parser = ChineseArgumentParser(description="创建长篇小说项目结构")
     parser.add_argument("project_name", nargs="?", default="my-novel", help="项目目录名")
     parser.add_argument("--target-dir", help="项目创建到哪个目录下，默认当前目录")
     parser.add_argument(

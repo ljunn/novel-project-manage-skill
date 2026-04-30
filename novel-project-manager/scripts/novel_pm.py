@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Project-management helper for long-form web-novel projects."""
+"""长篇网文项目管理辅助脚本。"""
 
 from __future__ import annotations
 
@@ -17,8 +17,54 @@ PRD_REL = Path(".novel-project/.taskmaster/docs/prd.txt")
 TASK_LOG_REL = Path("task_log.md")
 
 
+def localize_argparse_help(text: str) -> str:
+    return (
+        text.replace("usage:", "用法:")
+        .replace("positional arguments:", "位置参数:")
+        .replace("optional arguments:", "选项:")
+        .replace("options:", "选项:")
+        .replace("show this help message and exit", "显示此帮助信息并退出")
+    )
+
+
+CHINESE_METAVARS = {
+    "project_dir": "项目目录",
+    "chapter_num": "章节号",
+    "chapter_file": "章节文件",
+    "title": "标题",
+    "genre": "类型",
+    "target_words": "目标字数",
+    "update_frequency": "更新频率",
+    "audience": "目标读者",
+    "min_words": "最低字数",
+    "summary": "摘要",
+}
+
+
+class ChineseArgumentParser(argparse.ArgumentParser):
+    """让命令行帮助文本保持中文。"""
+
+    def add_argument(self, *args: Any, **kwargs: Any) -> argparse.Action:
+        if "metavar" not in kwargs and kwargs.get("action") not in {"store_true", "store_false", "help", "version"}:
+            dest = kwargs.get("dest")
+            option_strings = [arg for arg in args if isinstance(arg, str) and arg.startswith("-")]
+            if dest is None and option_strings:
+                dest = option_strings[-1].lstrip("-").replace("-", "_")
+            elif dest is None and args and isinstance(args[0], str):
+                dest = args[0]
+            if isinstance(dest, str) and dest in CHINESE_METAVARS:
+                kwargs["metavar"] = CHINESE_METAVARS[dest]
+        return super().add_argument(*args, **kwargs)
+
+    def format_usage(self) -> str:
+        return localize_argparse_help(super().format_usage())
+
+    def format_help(self) -> str:
+        return localize_argparse_help(super().format_help())
+
+
 def story_units(text: str) -> int:
-    """Count Chinese characters plus Latin/digit word groups."""
+    """统计中文字符，以及英文/数字词组。"""
     text = re.sub(r"```.*?```", "", text, flags=re.S)
     text = re.sub(r"`([^`]*)`", r"\1", text)
     text = re.sub(r"\[[^\]]*\]\([^)]*\)", "", text)
@@ -128,7 +174,7 @@ def default_files(title: str, genre: str, target_words: int, update_frequency: s
     return {
         PRD_REL: prd_template(title, genre, target_words, update_frequency, audience),
         TASK_LOG_REL: task_log_template(title, target_words),
-        Path(".novel-project/.taskmaster/docs/worldbuilding/README.md"): "# Worldbuilding\n\nUse this folder for detailed world rules, power systems, maps, social structures, and research notes.\n",
+        Path(".novel-project/.taskmaster/docs/worldbuilding/README.md"): "# 世界观\n\n这里存放详细世界规则、力量体系、地图、社会结构和资料笔记。\n",
         Path("docs/项目总纲.md"): markdown_template(
             title,
             f"《{title}》项目总纲",
@@ -233,8 +279,8 @@ def default_files(title: str, genre: str, target_words: int, update_frequency: s
 -
 """,
         ),
-        Path("characters/README.md"): "# Character Files\n\nCreate one markdown file per major character.\n",
-        Path("research/README.md"): "# Research\n\nStore market, genre, historical, cultural, and domain research here.\n",
+        Path("characters/README.md"): "# 人物档案\n\n每个主要人物单独建立一个文档文件。\n",
+        Path("research/README.md"): "# 资料研究\n\n这里存放市场、题材、历史、文化和领域资料。\n",
     }
 
 
@@ -495,10 +541,10 @@ def cmd_tasks(args: argparse.Namespace) -> int:
     project = extract_title_from_prd(prd, project_dir.name)
     written = save_tasks(project_dir, default_tasks(project), overwrite=args.overwrite)
     if not written:
-        print(f"tasks.json already exists: {project_dir / TASKS_REL}", file=sys.stderr)
-        print("Use --overwrite to regenerate it.", file=sys.stderr)
+        print(f"tasks.json 已存在：{project_dir / TASKS_REL}", file=sys.stderr)
+        print("使用 --overwrite 重新生成。", file=sys.stderr)
         return 1
-    print(f"generated: {project_dir / TASKS_REL}")
+    print(f"已生成：{project_dir / TASKS_REL}")
     return 0
 
 
@@ -522,21 +568,21 @@ def build_status(project_dir: Path) -> dict[str, Any]:
 def print_status_text(status: dict[str, Any]) -> None:
     manuscript = status["manuscript"]
     counts = status["tasks"]["counts"]
-    print(f"Project: {status['project']}")
-    print(f"Chapters: {manuscript['chapter_count']} | Words: {manuscript['word_count']}")
-    print(f"Latest: {manuscript['latest_chapter'] or 'none'}")
+    print(f"项目：{status['project']}")
+    print(f"章节：{manuscript['chapter_count']} | 字数：{manuscript['word_count']}")
+    print(f"最新章节：{manuscript['latest_chapter'] or '无'}")
     print(
-        "Tasks: "
-        f"todo={counts['todo']} doing={counts['doing']} blocked={counts['blocked']} done={counts['done']}"
+        "任务："
+        f"待办={counts['todo']} 进行中={counts['doing']} 阻塞={counts['blocked']} 完成={counts['done']}"
     )
     next_task = status["tasks"].get("next")
     if next_task:
-        print(f"Next: [{next_task.get('priority')}] {next_task.get('id')} {next_task.get('title')}")
-        print(f"Gate: {next_task.get('quality_gate')}")
+        print(f"下一项：[{next_task.get('priority')}] {next_task.get('id')} {next_task.get('title')}")
+        print(f"门禁：{next_task.get('quality_gate')}")
     else:
-        print("Next: none")
+        print("下一项：无")
     if status["warnings"]:
-        print("Warnings:")
+        print("警告：")
         for warning in status["warnings"]:
             print(f"- {warning}")
 
@@ -554,15 +600,15 @@ def cmd_next_task(args: argparse.Namespace) -> int:
     status = build_status(Path(args.project_dir).resolve())
     task = status["tasks"].get("next")
     if not task:
-        print("No ready task found.")
+        print("没有找到可执行任务。")
         return 1
     if args.json:
         print(json.dumps(task, ensure_ascii=False, indent=2))
     else:
         print(f"{task.get('id')} [{task.get('priority')}] {task.get('title')}")
-        print(f"Phase: {task.get('phase')}")
-        print(f"Deliverables: {', '.join(task.get('deliverables', []))}")
-        print(f"Quality gate: {task.get('quality_gate')}")
+        print(f"阶段：{task.get('phase')}")
+        print(f"交付物：{', '.join(task.get('deliverables', []))}")
+        print(f"质量门禁：{task.get('quality_gate')}")
     return 0
 
 
@@ -752,12 +798,12 @@ def cmd_check_chapter(args: argparse.Namespace) -> int:
     if args.json:
         print(json.dumps(result, ensure_ascii=False, indent=2))
     else:
-        print(f"File: {result['file']}")
-        print(f"Words: {result['word_count']}")
+        print(f"文件：{result['file']}")
+        print(f"字数：{result['word_count']}")
         if result["ok"]:
-            print("OK: pure manuscript format and minimum length passed.")
+            print("通过：正文纯度和最低字数检查通过。")
         else:
-            print("Issues:")
+            print("问题：")
             for item in result["violations"]:
                 print(f"- {item}")
     return 0 if result["ok"] else 1
@@ -769,7 +815,7 @@ def cmd_finish_chapter(args: argparse.Namespace) -> int:
     result = check_chapter_file(chapter_file, args.min_words)
     if not result["ok"] and not args.allow_issues:
         print(json.dumps(result, ensure_ascii=False, indent=2), file=sys.stderr)
-        print("Refusing to finish chapter while manuscript checks fail. Use --allow-issues to override.", file=sys.stderr)
+        print("正文检查未通过，拒绝标记章节完成。可使用 --allow-issues 强制继续。", file=sys.stderr)
         return 1
     title = args.title or "未命名"
     word_count = int(result["word_count"])
@@ -787,47 +833,47 @@ def cmd_finish_chapter(args: argparse.Namespace) -> int:
 
 
 def build_parser() -> argparse.ArgumentParser:
-    parser = argparse.ArgumentParser(description="Manage long-form web-novel project structure and tasks.")
-    sub = parser.add_subparsers(dest="command", required=True)
+    parser = ChineseArgumentParser(description="管理长篇网文项目结构和任务。")
+    sub = parser.add_subparsers(dest="command", required=True, parser_class=ChineseArgumentParser)
 
-    init = sub.add_parser("init", help="Initialize a managed novel project.")
+    init = sub.add_parser("init", help="初始化受管理的小说项目。")
     init.add_argument("project_dir")
     init.add_argument("--title", required=True)
     init.add_argument("--genre", default="待定")
     init.add_argument("--target-words", type=int, default=3_000_000)
     init.add_argument("--update-frequency", default="每日更新")
     init.add_argument("--audience", default="平台读者")
-    init.add_argument("--force", action="store_true", help="Overwrite populated template files.")
+    init.add_argument("--force", action="store_true", help="覆盖已有模板文件。")
     init.set_defaults(func=cmd_init)
 
-    tasks = sub.add_parser("tasks", help="Generate tasks.json from the PRD/template.")
+    tasks = sub.add_parser("tasks", help="从需求文档或模板生成 tasks.json。")
     tasks.add_argument("project_dir")
     tasks.add_argument("--overwrite", action="store_true")
     tasks.set_defaults(func=cmd_tasks)
 
-    status = sub.add_parser("status", help="Show project status.")
+    status = sub.add_parser("status", help="显示项目状态。")
     status.add_argument("project_dir")
     status.add_argument("--json", action="store_true")
     status.set_defaults(func=cmd_status)
 
-    next_task = sub.add_parser("next-task", help="Show the next ready task.")
+    next_task = sub.add_parser("next-task", help="显示下一项可执行任务。")
     next_task.add_argument("project_dir")
     next_task.add_argument("--json", action="store_true")
     next_task.set_defaults(func=cmd_next_task)
 
-    start = sub.add_parser("start-chapter", help="Create a chapter target and mark the chapter as in progress.")
+    start = sub.add_parser("start-chapter", help="创建章节目标，并把章节标记为进行中。")
     start.add_argument("project_dir")
     start.add_argument("chapter_num", type=int)
     start.add_argument("--title", default="未命名")
     start.set_defaults(func=cmd_start_chapter)
 
-    check = sub.add_parser("check-chapter", help="Check manuscript word count and pure-prose formatting.")
+    check = sub.add_parser("check-chapter", help="检查正文字数和纯正文格式。")
     check.add_argument("chapter_file")
     check.add_argument("--min-words", type=int, default=3000)
     check.add_argument("--json", action="store_true")
     check.set_defaults(func=cmd_check_chapter)
 
-    finish = sub.add_parser("finish-chapter", help="Finish a chapter and update progress records.")
+    finish = sub.add_parser("finish-chapter", help="完成章节并更新进度记录。")
     finish.add_argument("project_dir")
     finish.add_argument("chapter_num", type=int)
     finish.add_argument("chapter_file")
