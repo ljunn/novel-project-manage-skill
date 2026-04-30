@@ -1,0 +1,4 @@
+interface:
+  display_name: "Novel Project Manager"
+  short_description: "Manage PRD, tasks, chapters, and quality gates"
+  default_prompt: "Use $novel-project-manager to initialize and manage a long-form web novel project."
