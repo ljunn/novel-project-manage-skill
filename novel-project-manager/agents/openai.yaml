@@ -1,4 +1,4 @@
 interface:
   display_name: "小说项目管理器"
-  short_description: "管理需求文档、任务、章节和质量门禁"
-  default_prompt: "使用 $novel-project-manager 初始化并管理一个长篇网文小说项目。"
+  short_description: "落盘管理需求文档、任务、章节和质量门禁"
+  default_prompt: "使用 $novel-project-manager 初始化并落盘管理一个长篇网文小说项目。"
